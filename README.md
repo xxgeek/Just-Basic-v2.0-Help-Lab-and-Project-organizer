@@ -1,11 +1,17 @@
 'Name = Just Basic v2.0 Help Lab and Project Organizer v1.0
+
 'Author(s) - xxgeek, cundo, Carl Gundel
+
 'Date - Nov 2021
+
 '_Visit the Just Basic forums @ justbasiccom.proboards.com/ for more information.
+
 '_Purpose - To help new users learn to code in Just Basic v2.0_
+
 
 '_This program is a collection of other programs written by other users,_
 '_ and by Carl Gundel(creator of the Just Basic language)_
+
 '_Credit goes to cundo for the jbsearch (an engine to search the jb help files) _
 '_Credit also goes to cundo for the fastcode code generator that creates _
 '_the shell "Window" Code _
