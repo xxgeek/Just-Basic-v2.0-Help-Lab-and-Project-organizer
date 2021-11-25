@@ -33,24 +33,46 @@
 
 'xxgeek code
 'declare variables
-cursor hourglass
- on error goto [errorReport]
-  open "lablog.log" for append as #lablog : lablogIsOpen = 1
+'xxgeek code
+ 'check Liberty Basic v4.5.1 Default Install Dir for existence
+on error goto [errorReport]
+lablog$ = "lablog.log"
+  open lablog$ for append as #lablog : lablogIsOpen = 1
   #lablog, ""
    #lablog, ""
    #lablog, date$();"  ";time$()
    #lablog, ""
-   #lablog, "Start Up  >>> declaring globals ........."
+   #lablog, "Start Up  >>> declaring Just Basic install path ........."
+ JBpath$ = "C:\Program Files (x86)\Just Basic v2.0"
+ #lablog, "Verifying Just Basic install path ........."
 
+ 'if Just Basic v2.0 is NOT installed to it's Default Install Dir, get Path from User using folder dialog
+ res=pathExists(JBpath$)
+     if res then [start] else notice chr$(13)+" Just Basic v2.0 was not installed to the default install folder." +chr$(13)+"Hit [ok], then Select the Folder Just Basic v2.0 is Installed"
+
+'if folder path chosen by user for Liberty Basic install is wrong catch error later with check for lbrun2.exe
+#lablog, " User Just Basic install path   >>>  not default >>>> opening FolderDialog........."
+caption$ = "Select your JustBasic v2.0 install Dir"
+a$ = FolderDialog$(caption$)
+if right$(FolderDialog$,1) = "\" then FolderDialog$ = left$(FolderDialog$, len(FolderDialog$)-1)
+   if FolderDialog$ = "" then notice "Just Basic must be installed to continue" : close #lablog : end
+   JBpath$ = FolderDialog$
+ #lablog, "JBpath$ =  ";JBpath$ 
+
+[start]
  'declare globals, and dim arrays for key$ and info$ 
  global addfastfunction, selectedKey$, funcs$, project, fnamenobas$, DestPath$, DestPath1$, FolderDialog$, pnum, fastfuncs$, JBexe$, JBpath$, spritecreated, jbReservedWords$, dictionary$, keyCount, q$, fileToCheck$, lastKey$, helpFilePath$, resetsearch, closehtml, categorie$, upath$, selectedpath$
   dim key$(1000)
   dim info$(500, 500)
 
+'declare variables
   #lablog, "declaring variables......."
       q$ = chr$(34)
   addfastfunction = 0
-  project = 0
+  project = 1
+  closehtml = 1 'close all htmlviewer windows defaults to true
+  incbas = 1 'include bas file defaulkts to true
+   p = 0 'passworded exe defaults to false
   DestPathU$ = DefaultDir$;"\Projects"
   JBpath$ = "c:\Program Files (x86)\Just Basic v2.0"
   tutorialPath$ = JBpath$;"\jbtutorial\index.html"
@@ -74,20 +96,7 @@ cursor hourglass
    subroutines$ = "Subroutines"
    functions$ = "Functions"
    closehtml = 1
-   print "fixing date ....."
-   #lablog, "fixing date ............"
- fixDate$ = Date$("yyyy/mm/dd") 'set up the date format that works with a filename(remove the /)
- fix1$ = word$(fixDate$, 1, "/")
- fix2$ = word$(fixDate$, 2 ,"/")
- fix3$ = word$(fixDate$, 3 ,"/")
- fixeddate$ = "-";fix1$;"-";fix2$;"-";fix3$
-
- fixTime$ = Time$() 'set up the time format that works with a filename(remove the /)
- fix1$ = word$(fixTime$, 1, ":")
- fix2$ = word$(fixTime$, 2 ,":")
- fix3$ = word$(fixTime$, 3 ,":")
- fixedtime$ = "-";fix1$;"-";fix2$;"-";fix3$
-
+  jberrorlog$ = "error.log"
 'cundo's fastcode generator
 #lablog, "defining window types array......."
  dim windowTypes$(19)
@@ -133,13 +142,14 @@ cursor hourglass
 'jbsearch code by cundo
 #lablog, "finishing help lab window......."
 'top menu
-    menu #main, "File" , "Open a File in Just Basic v2.0", [openFile], "Exit", [quit.main]
+    menu #main, "File" , "Open a File in Liberty Basic v4.5.1", [openFile], "Exit", [quit.main]
     menu #main, "Edit"
-    menu #main, "View", "This Help Lab's Progress Log", [labLog], "Just Basic v2.0 Error Log", [jberrorLog], "Runtime Error Log", [runtimeLog], "Help Lab Error Log", [helplaberrorLog]
-    menu #main, "Tools" , "BAS <2> EXE", [bas2exe], "BAS <2> TKN",  [bas2tkn], ".BAS Line Count", [numofLines], "MSPaint", [pictures], "Voice Recorder", [record], "Notepad", [openNotePad]
-    menu #main, "Options", "Preferences", [preferences]
-    menu #main, "Browse" , "My Projects", [projectsDir],"My EXE Files", [exeDir], "My TKN Files", [tknDir], "JB Example Files", [jbexamplesDir], "JB Function Files", [jbfunctionsDir], "JB BMP Files", [bmpDir], "JB Sprite Files", [spritesDir]
-    menu #main, "Help" , "Help", [jbHelpLabHelp], "About", [about]
+    menu #main, "View", "LabLog (Progress Log)", [labLog], "Just Basic Error Log", [jberrorLog], "Runtime Error Log", [runtimeLog], "Help Lab Error Log", [helplaberrorLog], "System Information", [sysinfo]
+    menu #main, "Tools" , "BAS <2> EXE", [makeEXE], "BAS <2> TKN",  [bas2tkn], ".BAS Line Count", [numofLines], "Task Manager", [taskman], "Resource Monitor", [resmon], "MSPaint", [pictures], "Voice Recorder", [record], "Notepad", [openNotePad], "Character Map", [charmap]
+    menu #main, "Options", "HotKeys", [hotkeys], "Display Settings", [display], "Magnifier", [magnify], "Clear Logs", [clearLogs]
+    menu #main, "Browse" , "My Projects", [projectsDir],"My EXE Files", [exeDir], "My TKN Files", [tknDir], "DefaultDir$", [defaultDir], "JB Example Files", [jbexamplesDir], "JB BMP Files", [bmpDir], "JB Sprite Files", [spritesDir]
+    menu #main,  "Help" , "Just Basic Forums", [forumlink], "Help", [jbHelpLabHelp], "About", [about]
+
 'jbsearch by cundo
     listbox #main.listbox1, helpList$(, lbDoubleClick, 420, 80, 320, 282
     statictext  #main.searchtext, "Search For KeyWord(s)", 755, 40, 160, 20
@@ -245,10 +255,22 @@ cursor hourglass
    statictext  #main.useful, "Useful Tools", 1095, 102, 160, 20
    statictext  #main.browse, "Browse", 1250, 100, 162, 20
    statictext  #main.choose, "Select  a Category >>  >>> ", 55, 395, 200, 20
-   statictext  #main.killtext, "Kill All JB Processes >", 1170, 660, 150, 20
-   statictext  #main.jbforums, "Visit https://justbasiccom.proboards.com/", 05, 700, 275, 25
-'kill all button
-   button #main.killAll, " &@ ", [killAll], UL, 1320, 653, 30, 30
+   statictext  #main.killtext, "Kill All JB Processes >", 1165, 675, 150, 20
+   statictext  #main.logsClear, "Clear All Logs >", 1205, 652, 105, 20
+   statictext  #main.conHeader, "Converter", 1230, 510, 90, 15
+   statictext  #main.dec, "DEC", 1140, 529, 30, 15
+   statictext  #main.hex, "HEX", 1140, 549, 30, 15
+   statictext  #main.dec2bin, "BIN", 1140, 569, 30, 15
+    textbox     #main.dec2h, 1170, 525, 175, 20
+    textbox     #main.hex2d, 1170, 545, 175, 20
+    textbox     #main.bin2d, 1170, 565, 175, 20
+    button #main.converter, "&2 Convert", [converter], UL, 1180, 590, 75, 20
+    button #main.conClear, "&0 Results", [clearConverter], UL, 1265, 590, 75, 20
+'forums link
+button #main.jbforums, "Vist the Just Basic Forums", [forumlink], UL, 600, 690, 195, 17
+'kill all button, clear all logs button
+   button #main.killAll, " &K ", [killAll], UL, 1315, 675, 20, 15
+   button #main.clearLogs, " &X ", [clearLogs], UL, 1315, 652, 20, 15
 
 #lablog, "opening help lab window......."
  open "Just Basic v2.0 Help Lab and Project Organizer" for window as #main
@@ -282,8 +304,7 @@ cursor hourglass
         #main.combo "selectindex 17"
         #main.keys "singleclickselect"
         #main.button1, "!font arial 10 bold"
-        #main.tutorial, "!font arial 10 bold"
-        #main.search, "!font arial 10 bold"
+        #main.searchin, "!font arial 12 bold"
         #main.st1, "!font arial 10 bold "
         #main.fastcode, "!font arial 12 bold"
         #main.search, "!font arial 12 bold"
@@ -299,6 +320,7 @@ cursor hourglass
         #main.deleteListing, "!hide"
         #main.remakeproject, "!font arial 10 bold"
         #main.makeproject, "!font arial 10 bold"
+
 cursor normal
 #lablog, "calling progressbar 0......."
   call progressBar
@@ -663,6 +685,44 @@ prompt "No Runtime errors have occured yet"+chr$(13)+ "Was this Helpful?";answer
 end if
 wait
 
+[converter]
+#lablog, "@ - [convertdec2hex]........"
+#main.dec2h "!contents? decVal";
+#main.hex2d "!contents? hexVal$";
+#main.bin2d "!contents? binVal";
+    if decVal = 0 and hexVal$ =  "" and binVal = 0 then wait
+    if decVal <> 0 and binVal <> 0 then  confirm "Can't Convert 2 values. Try ONE values.  Try Again?";answer$ : wait
+    if decVal <> 0 and hexVal$ <> "" or binVal <> 0 and hexVal$ <> "" then confirm "Can't Convert 2 values. Try Again?";answer$ : wait
+    if binVal <> 0 and decVal <> 0 then confirm "Can't Convert 2 values. Try ONE values.  Try Again?";answer$ : wait
+    if decVal <> 0 and hexVal$ = "" and binVal = 0 then
+        hex$ = dechex$(decVal)
+        #main.hex2d, hex$
+                     bin$ = Dec2Bin$(decVal)
+        #main.bin2d, bin$
+   end if
+  if decVal = 0 and hexVal$ <> "" and binVal = 0 then
+            dec = hexdec(hexVal$)
+            #main.dec2h, dec
+            #main.dec2h "!contents? decVal";
+           bin$ = Dec2Bin$(decVal)
+        #main.bin2d, bin$
+  end if
+  if decVal = 0 and hexVal$ = "" and binVal <> 0 then
+         decimal = dec(binVal)
+         #main.dec2h, decimal
+         #main.dec2h "!contents? decVal";
+        hex$ = dechex$(decVal)
+      #main.hex2d, hex$
+  end if
+ wait
+
+[clearConverter]
+#lablog, "@ - [clearConverter] = clearing Binary, Decimal, and Hexidecimal textboxes......"
+    #main.dec2h, ""
+    #main.bin2d, ""
+    #main.hex2d, ""
+ wait
+
 'radio button selections from MyProjects to Help
 [projs]
 #lablog "@- [projs] ........"
@@ -911,10 +971,49 @@ call saveValue
    #main.choose, "Select a  ";category$;" Topic"
    wait
 
+'open hotkeys.txt"
+[hotkeys]
+  #lablog, "@ - [hotkeys]......"
+ hotkeys$ = "hotkeys.txt"
+   if fileExists(DefaultDir$, hotkeys$) then
+      run "notepad ";hotkeys$
+   end if
+wait
+
+'open System Information
+[sysinfo]
+#lablog, "@ - [sysinfo]....."
+ run "cmd.exe /c msinfo32", HIDE
+wait
+
+'open Resource Monitor
+[resmon]
+#lablog, "@ - [resmon]...."
+run "cmd.exe /c resmon", HIDE
+wait
+
+'open charactermap
+[charmap]
+#lablog, "@ = [charmap]....."
+run "cmd.exe /c charmap", HIDE
+wait
+
+'Display Settings
+[display]
+#lablog, "@ - [display]......"
+run "cmd.exe /c desk.cpl", HIDE
+wait
+
+'open Magnifyier
+[magnify]
+#lablog, "@ - [magnify......"
+run "cmd.exe /c magnify", HIDE
+wait
+
 'open windows taskmanager (used to kill "non responsive" code (usually caught in loops)
 [taskman]
 #lablog "@- [taskman] ............"
-run "taskmgr.exe"
+run "explorer c:\Windows\System32\taskmgr.exe"
 wait
 
 'open Windows Calculator
@@ -1004,6 +1103,11 @@ end if
 end if
 wait
 
+[defaultDir]
+#lablog, "Opening File Manager to : ";DefaultDir$
+  run "explorer.exe ";q$;DefaultDir$;q$
+ wait
+
 #lablog "@- [about] ............"
 message$ = chr$(13);"     JB Help Lab and Project Manager v1.0";_
 chr$(13);_
@@ -1062,6 +1166,33 @@ helplaberrorLog$ = "jbHelpLabError.log"
 run "notepad ";helplaberrorLog$
 wait
 
+[clearLogs]
+#lablog, "@ [clearLogs] - closing #lablog temporarily,  clearing lablog.log"
+print "@ [clearLogs] - closing #lablog temporarily, and clearing lablog.log"
+    if lablogIsOpen = 1 then
+          close #lablog
+          kill DefaultDir$;"\";lablog$
+          open lablog$ for append as #lablog
+        #lablog, chr$(13);"lablog Cleared - lablog re-opened > ";date$();" ";time$();chr$(13)
+   print "lablog cleared"
+    end if
+    if fileExists(upath$;"\Application Data\Just Basic v2.0", jberrorlog$) <> 0 then
+         kill upath$;"\Application Data\Just Basic v2.0\";jberrorlog$
+        #lablog, "Just Basic Error Log Cleared  > ";date$();" ";time$()
+    end if
+    if fileExists(DefaultDir$, helplaberrorLog$) <> 0 then
+         kill DefaultDir$;"\";helplaberrorLog$
+         #lablog, "Help Lab ErrorLog Cleared > ";date$();" ";time$()
+    end if
+    if fileExists(DefaultDir$, runtimeErrorLog$) <> 0 then
+         kill DefaultDir$;"\";runtimeErrorLog$
+         #lablog, "Runtime Error Log Cleared > ";date$();" ";time$()
+    end if
+    open upath$;"\AppData\Roaming\Just Basic v2.0\";jberrorlog$ for output as #1
+    #1, " "
+    close #1
+ wait
+
 [labLog]
 #lablog "@- [labLog] User clicked to open error log closing error log temporarily............"
 close #lablog
@@ -1071,11 +1202,14 @@ open lablog$ for append as #lablog
 wait
 
 [jbHelpLabHelp]
-#lablog "@- [jbHelpLabHelp] ............"
-message$ = "Not in this Version, please try without Help";chr$(13);"You Should be able to Figure it out"
-a$ = GetMessage$(message$)
-wait
-
+help$ = "help.txt"
+#lablog "@- [lbHelpLabHelp] opening notepad to.....  ";help$
+   if fileExists(DefaultDir$, help$) then
+       run "notepad ";help$
+   else
+     notice "Can't find Help File (help.txt) in DefaultDir$"
+   end if
+ wait
 'open Just Basic IDE
 [jbProgs]
 #lablog "@- [jbProgs] ............"
@@ -1127,8 +1261,8 @@ res = fileExists(DefaultDir$, "SpriteCreator v2\SpriteCreator.bas")
      goto [makeEXE]
  wait
 
-[preferences]
-confirm "No Preferences page yet"+chr$(13)+chr$(13)+"Was this helpful?";lol$
+[forumlink]
+run "explorer.exe https://justbasiccom.proboards.com/"
 wait
 
 ' a program to select a bas file to get it's Line count
@@ -1149,6 +1283,28 @@ filedialog "Open \ Select a Just Basic Source File (.bas) ", DefaultDir$; "\*.ba
   message$ = chr$(13);chr$(13);"   ";file2Check$;chr$(13);chr$(13);"   ";x-y;" lines of code";chr$(13);"   ";y;"  lines of spaces ";chr$(13);"   ";x;"  lines in total";chr$(13);"    Approx ";x/25;" pages"
   message$ = GetMessage$(message$)
 wait
+
+
+'xxgeek code
+sub fixdate
+   print "@ - sub fixdate - fixing date ............"
+   #lablog, "@ - sub fixdate - fixing date ............"
+   fixDate$ = Date$("yyyy/mm/dd") 'set up the date format that works with a filename(remove the /)
+   fix1$ = word$(fixDate$, 1, "/")
+   fix2$ = word$(fixDate$, 2 ,"/")
+   fix3$ = word$(fixDate$, 3 ,"/")
+   fixeddate$ = "-";fix1$;"-";fix2$;"-";fix3$
+ end sub
+
+ sub fixtime
+ print "@ - sub fixtime - fixing date ............"
+   #lablog, "@ - sub fixtime - fixing date ............"
+   fixTime$ = Time$() 'set up the time format that works with a filename(remove the /)
+   fix1$ = word$(fixTime$, 1, ":")
+   fix2$ = word$(fixTime$, 2 ,":")
+   fix3$ = word$(fixTime$, 3 ,":")
+   fixedtime$ = "-";fix1$;"-";fix2$;"-";fix3$
+ end sub
 
 'subroutine for selections of combo boxes
 sub asciiSelected asciiList$
@@ -1417,48 +1573,52 @@ end sub
      close  #1
    cursor normal
  end sub
-
-'create a project and tkn file and add it to the MyProjects List
+ 'create a project and tkn file and add it to the MyProjects List
 [makeproject]
 #lablog," @ - [makeproject]"
- if tkn = 0 or tkn = 1 then
-    if categorie$ <> MyProjects$ then
-       notice "You must first select Radio Button >> MyProjects" : wait
-    end if
-   goto [bas2exe]
- end if
-tkn = 2
-goto [bas2exe]
+     if categorie$ <> MyProjects$ then
+        confirm "Select Radio Button  >>  MyProjects  <<, and Try Again?";answer$ : wait
+     end if
+       tkn = 2
+       project = 1
+  goto [bas2exe]
 
 [remakeproject]
-if categorie$ <> MyProjects$  then notice "Select a Listing under Radio Button MyProjects and TRY AGAIN" : wait
-if selectedKey$ = "" then notice "No Listing was selected. Select an item from the list and try again " : wait
-#lablog," @ - [remakeproject]"
-tkn = 4
-fname$ = savedProjects$;"\";selectedKey$;"\";selectedKey$;".bas"
-goto [bas2exe]
+ #lablog," @ - [remakeproject]"
+     if selectedKey$ = "" then confirm "Select an item from >>  "+categorie$+ "  << List and Try Again? ";answer$ : wait
+     if fileExists(savedProjects$;"\";selectedKey$,selectedKey$;".bas") = 0 then notice selectedKey$+chr$(13)+" of "+categorie$+" wasn't saved"+chr$(13)+"Try [Make New Project], BAS<2>EXE, or BAS<2>TKN"+chr$(13)+"And Select the appropriate .bas file" : wait
+    project = 1
+    tkn = 4
+     fname$ = savedProjects$;"\";selectedKey$;"\";selectedKey$;".bas"
+  goto [bas2exe]
 
 [bas2tkn]
-if categorie$ <> programs$ then notice "You must first select the - Programs -  RadioButtun" : wait
-#lablog," @ - [bas2tkn]"
-tkn = 3
+     if categorie$ <> programs$ then confirm "Select Radio Button >>  Programs  << and Try Again?";answer$ : wait
+      #lablog," @ - [bas2tkn]"
+       tkn = 3
 goto [bas2exe]
 
+[makeEXE]
+          if categorie$ <> programs$ then
+             confirm "Select Radio Button >>  Programs  << and Try Again?";answer$ : wait
+          end if
+          tkn = 0
  'BAS2EXE Version v1.8a For Linux/WINE,  Windows 10 (possibly XP, Win 7, 8)
 'Date = July 2021
 'Title - BAS2EXE v1.8
 'Author - xxgeek, a member of the justbasiccom.proboards.com/ forums
- a = a+ 1
  print "Starting into BAS2EXE"
 [bas2exe]
-project = 1
-incbas = 1
-#lablog," @ - [bas2exe]"
-if tkn = 0 then print "@ [bas2exe] Starting - Running BAS<2>EXE user chooses if full project, no new listing"
+#lablog, "@ - [bas2exe] - calling fixtime, and fixdate"
+call fixtime
+call fixdate
+
+if tkn = 0 then print "@ [bas2exe] Starting - Running BAS<2>EXE user chooses if full project, plus adding new listing in Programs"
 if tkn = 2 then print "@ [bas2exe] Starting  - Making New Project, plus creating new listing in MyProjects category"
 if tkn = 3 then print "@ [bas2exe] Starting  - Making TKN, plus adding listing in Programs category"
 if tkn = 4 then print "@ [bas2exe] Starting to remake project ";selectedKey$;" ReWriting MyProjects Listing"
-    p = 0 'passworded exe defaults to false
+
+     p = 0 'passworded exe defaults to false
     titlebar$ =  "BAS2EXE v1.8"
 
 'check Just Basic v2.0 Default Install Dir for existence
@@ -1537,40 +1697,29 @@ open "BAS2EXE v1.8" for window_nf as #pick
  #pick.default, "!font Arial 12 bold"
  #pick.default, "!setfocus"
   print "window up and running "
+ if tkn = 3 then
+       #pick.temp, "!HIDE"
+       #pick.exe "!HIDE"
+       #pick.header "BAS < 2 > TKN"
+       #pick.bit64, "HIDE"
+       #pick.bit32, "HIDE"
+       #pick.sed, "HIDE"
+       #pick.vbs, "HIDE"
+   end if
 
-  #lablog$, "If tkn = 3 then BAS<2>EXE Button was pressed. Creating Make New Project Window"
-  if tkn = 3 then
-    #pick.exe "!HIDE"
-    #pick.header "Make TKN File"
-    #pick.bit64, "HIDE"
-     #pick.bit32, "HIDE"
-      #pick.sed, "HIDE"
-      #pick.vbs, "HIDE"
-        #pick.project, "HIDE"
-   #pick.temp, "!HIDE"
- #pick.datedtext, "!HIDE"
-   #pick.incbas, "HIDE"
-       #pick.TKN, "HIDE"
- #pick.BAS, "HIDE"
- #pick.password, "HIDE"
-       end if
-
-  if tkn = 2 then
-  #lablog$, "If tkn = 2 then Make Project Button was pressed. Creating Make New Project Window"
-  #pick.project, "HIDE"
-   #pick.temp, "!HIDE"
- #pick.datedtext, "!HIDE"
-   #pick.incbas, "HIDE"
-    #pick.exe "!HIDE"
-    #pick.header "Make New project"
-    #pick.bit64, "HIDE"
-     #pick.bit32, "HIDE"
-      #pick.sed, "HIDE"
-      #pick.vbs, "HIDE"
-       #pick.TKN, "HIDE"
- #pick.BAS, "HIDE"
- #pick.password, "HIDE"
-       end if
+   if tkn = 2 then
+         #lablog$, "If tkn = 2 then Make Project Button was pressed. Creating Make New Project Window"
+         #pick.project, "HIDE"
+         #pick.temp, "!HIDE"
+         #pick.incbas, "HIDE"
+         #pick.exe "!HIDE"
+         #pick.header "Make New project"
+         #pick.bit64, "HIDE"
+         #pick.bit32, "HIDE"
+         #pick.sed, "HIDE"
+         #pick.vbs, "HIDE"
+        #pick.password, "HIDE"
+   end if
 wait
 
  [incsource]
@@ -2022,17 +2171,19 @@ print "@ [continueOn] - tkn file verified dated and saved to TKN dir..........."
      goto [continue]
   end if
 
+'if tkn =3 then add new Title to Programs List, and copy code to texteditor"
    if tkn = 3 then
-       print "sending to [newKey]/[continue] to add to ";categorie$;" List........"
- #lablog, "sending to [newKey]/[continue] to add to ";categorie$;" List........"
+       print "sending to [newKey]/[continue] to add to ";categorie$;" List........  ";programs$
+      #lablog, "sending to [newKey]/[continue] to add to ";categorie$;" List........  ";programs$
       newKey$ = fnamenobas$
       categorie$ = programs$
      goto [continue]
   end if
 
-  if tkn = 4 then
-    print "sending to [newKey]/[continue] to add to ";categorie$;" List........"
- #lablog, "sending to [newKey]/[continue] to add to ";categorie$;" List........"
+ 'if tkn = 4 then add new Title to Programs List, and copy code to texteditor"
+   if tkn = 4 then
+      print "sending to [newKey]/[continue] to add to ";categorie$;" List........"
+     #lablog, "sending to [newKey]/[continue] to add to ";categorie$;" List........"
       newKey$ = fnamenobas$
       categorie$ = MyProjects$
      goto [continue]
@@ -2202,25 +2353,24 @@ print "@ [verifyEXE] entering verification loop"
                close #1
    end if
 
-  print DefaultDir$;"\EXE\";exe$;"  was created sucessfully"
+ print DefaultDir$;"\EXE\";exe$;"  was created sucessfully"
  #lablog, DefaultDir$;"\EXE\";exe$;"  was created sucessfully"
   print "renaming EXE\ ";fnamenobas$;" to ";fnamenobas$;fixeddate$;".exe"
  #lablog, "renaming EXE\ ";fnamenobas$;" to ";fnamenobas$;fixeddate$;".exe"
   if fileExists(DefaultDir$;"\EXE", fnamenobas$;".exe") = 0 then
-       notice fnamenobas$;".exe";" was Not created in  ";DefaultDir$;"\EXE"
+          notice fnamenobas$;".exe";" was Not created in  ";DefaultDir$;"\EXE"
   else
-      if fileExists(DefaultDir$;"\EXE", fnamenobas$;".exe") <> 0 then
-          name DefaultDir$;"\EXE\";fnamenobas$;".exe" as DefaultDir$;"\EXE\";fnamenobas$;fixeddate$;".exe"
-           'if tkn = 0 or tkn = 1 then
-                 cursor normal
-                 tkn = 2
-                 print "sending to [newKey]/[continue] to add to ";categorie$;" List........"
-                #lablog, "sending to [newKey]/[continue] to add to ";categorie$;" List........"
-                newKey$ = fnamenobas$
-                categorie$ = MyProjects$
-                goto [continue]
-         'end if
-      end if
+         if fileExists(DefaultDir$;"\EXE", fnamenobas$;".exe") <> 0 then
+             name DefaultDir$;"\EXE\";fnamenobas$;".exe" as DefaultDir$;"\EXE\";fnamenobas$;fixeddate$;".exe"
+              if tkn = 0 or tkn = 1 then
+                    tkn = 3
+                    print "sending to [newKey]/[continue] to add to ";categorie$;" List........"
+                    #lablog, "sending to [newKey]/[continue] to add to ";categorie$;" List........"
+                    newKey$ = fnamenobas$
+                    categorie$ = programs$
+                     goto [continue]
+              end if
+        end if
   end if
 
 [done]
@@ -2578,7 +2728,6 @@ end sub
  call cleanup
  if lablogIsOpen = 1 then close #lablog
      close #main
-     run "taskkill /IM jbasic.exe   /F", HIDE
     end
 
 'sub to  create pauses in program
@@ -2729,6 +2878,32 @@ function GetMessage$(message$)
 [quit]
       scan
       close #textmessage : exit function
+end function
+
+
+function dec(n)
+#lablog, "Entering function dec(n)......."
+if n <> int(n) then confirm "Value MUST be an Integer"+chr$(13)+"Was this Helpful?";answer$ : exit function
+    n$ = str$(n) : ln = len(n$) : exp = ln
+    for x = 1 to ln
+        exp = exp - 1 : dec = dec + (val(mid$(n$,x,1)) * (2 ^ exp))
+    next
+end function
+
+'function converts decimal value to binary
+function Dec2Bin$(decimal)
+#lablog, "Entering function Dec2Bin$(decimal)....."
+    'non-integers would not give the correct result
+    if decimal <> int(decimal) then confirm "Value MUST be an Integer"+chr$(13)+"Was this Helpful?";answer$ : exit function
+    if decimal = 0 then
+        Dec2Bin$ = "0"
+        else
+        while decimal > 0
+            Dec2Bin$ = str$(decimal and 1); Dec2Bin$ 
+            decimal = int(decimal/2)
+            scan
+        wend
+    end if
 end function
 
 'function to separate filename from full path to file
