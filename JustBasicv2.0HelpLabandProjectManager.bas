@@ -50,8 +50,7 @@ lablog$ = "lablog.log"
  res=pathExists(JBpath$)
      if res then [start] else notice chr$(13)+" Just Basic v2.0 was not installed to the default install folder." +chr$(13)+"Hit [ok], then Select the Folder Just Basic v2.0 is Installed"
 
-'if folder path chosen by user for 
-ust Basic install is wrong catch error later with check for lbrun2.exe
+'if folder path chosen by user for Just Basic install is wrong catch error later with check for jbbrun2.exe
 #lablog, " User Just Basic install path   >>>  not default >>>> opening FolderDialog........."
 caption$ = "Select your JustBasic v2.0 install Dir"
 a$ = FolderDialog$(caption$)
