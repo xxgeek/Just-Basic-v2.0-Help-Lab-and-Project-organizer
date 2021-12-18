@@ -79,7 +79,7 @@ if right$(FolderDialog$,1) = "\" then FolderDialog$ = left$(FolderDialog$, len(F
   JBexe$ = "jbasic.exe" : JBruntime$ = "jbrun2.exe"
   openhelp$ = JBpath$;"\jb2help\JustBASIC_2_web\amber_menu.htm"
   helpFilePath$ = JBpath$;"\jb2help\JustBASIC_2_web" : helpFileMenu$ = "amber_menu.htm"
-  jbReservedWords$ = "AND, APPEND, AS, BEEP, BMPBUTTON, BMPSAVE, BUTTON, BYREF, CALL, CALLFN, CASE, CHECKBOX, CLOSE, CLS, COLORDIALOG, COMBOBOX, CONFIRM, CURSOR, DATA, DIALOG, DIM, DLL, DO, DUMP, ELSE, END, ERROR, EXIT, FIELD, FILEDIALOG, FILES, FONTDIALOG, FOR, FUNCTION, GET, GETTRIM, GLOBAL, GOSUB, GOTO, GRAPHICBOX, GRAPHICS, GROUPBOX, IF, INPUT, KILL, LET, LINE, LISTBOX, LOADBMP, LOOP, LP, PRINT, MAINWIN, MAPHANDLE, MENU, NAME, NEXT, NOMAINWIN, NOTICE, ON, ONCOMERROR, OR, OPEN, OUTPUT, PASSWORD, PLAYMIDI, PLAYWAVE, POPUPMENU, PRINT, PRINTERDIALOG, PROMPT, PUT, RADIOBUTTON, RANDOM, RANDOMIZE, READ, READJOYSTICK, REDIM, REM, RESTORE, RESUME, RETURN, RUN, SCAN, SELECT, SORT, STATICTEXT, STOP, STOPMIDI, SUB, TEXT, TEXTBOX, TEXTEDITOR, THEN, TIMER, TITLEBAR, TRACE, UNLOADBMP, UNTIL, WAIT, WINDOW, WEND, WHILE, XOR, ABS(, ACS(, ASC(, ASN(, ATN(, CHR$(, COS(, DATE$(, DECHEX$(, EOF(, EXP(, HEXDEC(, INPUT$(, INPUTTO$(, INSTR(, INT(, LEFT$(, LEN(, LOF(, LOG(, LOWER$(, MAX(, MIDIPOS(, MID$(, MIN(, MKDIR(, NOT(, RIGHT$(, RMDIR(, RND(, SIN(, SPACE$(, SQR(, STR$(, TAB(, TAN(, TIME$(, TRIM$(, TXCOUNT(, UPPER$(,  USING(, VAL(, WORD$(, BackgroundColor$, ComboboxColor$, CommandLine$, DefaultDir$, DisplayHeight, DisplayWidth, Drives$, Err, Err$, ForegroundColor$, Joy1x, Joy1y, Joy1z, Joy1button1, Joy1button2, Joy2x, Joy2y, Joy2z, Joy2button1, Joy2button2, ListboxColor$, Platform$, PrintCollate, PrintCopies, PrinterFont$, PrinterName$, TextboxColor$, TexteditorColor$, Version$, WindowHeight, WindowWidth, UpperLeftX, UpperLeftY"
+  jbReservedWords$ = " AND, APPEND, AS, BEEP, BMPBUTTON, BMPSAVE, BUTTON, BYREF, CALL, CALLFN, CASE, CHECKBOX, CLOSE, CLS, COLORDIALOG, COMBOBOX, CONFIRM, CURSOR, DATA, DIALOG, DIM, DLL, DO, DUMP, ELSE, END, ERROR, EXIT, FIELD, FILEDIALOG, FILES, FONTDIALOG, FOR, FUNCTION, GET, GETTRIM, GLOBAL, GOSUB, GOTO, GRAPHICBOX, GRAPHICS, GROUPBOX, IF, INPUT, KILL, LET, LINE, LISTBOX, LOADBMP, LOOP, LP, PRINT, MAINWIN, MAPHANDLE, MENU, NAME, NEXT, NOMAINWIN, NOTICE, ON, ONCOMERROR, OR, OPEN, OUTPUT, PASSWORD, PLAYMIDI, PLAYWAVE, POPUPMENU, PRINT, PRINTERDIALOG, PROMPT, PUT, RADIOBUTTON, RANDOM, RANDOMIZE, READ, READJOYSTICK, REDIM, REM, RESTORE, RESUME, RETURN, RUN, SCAN, SELECT, SORT, STATICTEXT, STOP, STOPMIDI, SUB, TEXT, TEXTBOX, TEXTEDITOR, THEN, TIMER, TITLEBAR, TRACE, UNLOADBMP, UNTIL, WAIT, WINDOW, WEND, WHILE, XOR, ABS(, ACS(, ASC(, ASN(, ATN(, CHR$(, COS(, DATE$(, DECHEX$(, EOF(, EXP(, HEXDEC(, INPUT$(, INPUTTO$(, INSTR(, INT(, LEFT$(, LEN(, LOF(, LOG(, LOWER$(, MAX(, MIDIPOS(, MID$(, MIN(, MKDIR(, NOT(, RIGHT$(, RMDIR(, RND(, SIN(, SPACE$(, SQR(, STR$(, TAB(, TAN(, TIME$(, TRIM$(, TXCOUNT(, UPPER$(, USING(, VAL(, WORD$(, BackgroundColor$, ComboboxColor$, CommandLine$, DefaultDir$, DisplayHeight, DisplayWidth, Drives$, Err, Err$, ForegroundColor$, Joy1x, Joy1y, Joy1z, Joy1button1, Joy1button2, Joy2x, Joy2y, Joy2z, Joy2button1, Joy2button2, ListboxColor$, Platform$, PrintCollate, PrintCopies, PrinterFont$, PrinterName$, TextboxColor$, TexteditorColor$, Version$, WindowHeight, WindowWidth, UpperLeftX, UpperLeftY"
   DllList$="vbas31w.sll vgui31w.sll voflr31w.sll vthk31w.dll vtk1631w.dll vtk3231w.dll vvm31w.dll vvmt31w.dll"
   savedProjects$ = "savedProjects"
    MyProjects$ = "MyProjects"
@@ -220,7 +220,7 @@ if right$(FolderDialog$,1) = "\" then FolderDialog$ = left$(FolderDialog$, len(F
    button #main.task, " Tas&k Manager ", [taskman], ul, 1085, 125, 120, 23
    button #main.calc, " &Calculator ", [calc], ul, 1085, 155, 120, 23
    button #main.record, " &Voice Recorder ", [record], ul, 1085, 185, 120, 23
-   button #main.basexe, "  BAS < 2 > &EXE ", [makeproject], ul, 1085, 215, 120, 23
+   button #main.basexe, "  BAS < 2 > &EXE ", [makeEXE], ul, 1085, 215, 120, 23
    button #main.bas2tkn, " BAS < 2 > &TKN ", [bas2tkn], ul, 1085, 245, 120, 23
    button #main.numLines, " .BAS &Line Count ", [numofLines], ul, 1085, 275, 120, 23
    button #main.notepad, " NoteP&ad ", [openNotePad], ul, 1085, 305, 120, 23
@@ -533,7 +533,7 @@ print "@- [deleteKey]....."
    answer$ = "yes"
     if selectedKey$ = "" then
     prompt "No Selection made. Try again?";answer$
-    if selectedKey$ = "" then wait
+    if selectedKey$ <> "yes" then wait
     end if
   prompt "Deleting Entry" + chr$(13) + selectedKey$ + "   OK ?";answer$
     if answer$ <> "yes" then wait
@@ -569,11 +569,10 @@ statictext #deleteKey.text, " Please wait - Deleting a listing can take some tim
       print "dontsave = ";line$
       print "word1$ = ";word1$
       print "line$ = ";line$
-       if line$ = "" then [dontSave]
       if line$ = word1$ then [dontSave]
       #2, line$
 [dontSave]
-#lablog, "deleting line ";line$;" and any empty lines "
+#lablog, "deleting line ";line$
  wend
      close #1
      close #2
@@ -748,7 +747,7 @@ wait
 #lablog "@- [progs] ............"
    #main.runListing, "!show"
    #main.makeproject, "!hide"
-   #main.remakeproject, "!hide"
+   #main.remakeproject, "!show"
    #main.runjb, "!show"
    #main.addListing, "!show"
    #main.deleteListing, "!show"
@@ -1585,7 +1584,7 @@ end sub
 
 [remakeproject]
  #lablog," @ - [remakeproject]"
-     if selectedKey$ = "" then confirm "Select an item from >>  "+categorie$+ "  << List and Try Again? ";answer$ : wait
+     if selectedKey$ = "" then confirm "Select an item from the List and Try Again? ";answer$ : wait
      if fileExists(savedProjects$;"\";selectedKey$,selectedKey$;".bas") = 0 then notice selectedKey$+chr$(13)+" of "+categorie$+" wasn't saved"+chr$(13)+"Try [Make New Project], BAS<2>EXE, or BAS<2>TKN"+chr$(13)+"And Select the appropriate .bas file" : wait
     project = 1
     tkn = 4
@@ -1603,12 +1602,22 @@ goto [bas2exe]
              confirm "Select Radio Button >>  Programs  << and Try Again?";answer$ : wait
           end if
           tkn = 0
+
  'BAS2EXE Version v1.8a For Linux/WINE,  Windows 10 (possibly XP, Win 7, 8)
 'Date = July 2021
 'Title - BAS2EXE v1.8
 'Author - xxgeek, a member of the justbasiccom.proboards.com/ forums
- print "Starting into BAS2EXE"
+
 [bas2exe]
+dim string$(250)
+   for x =  len(fnamenobas$) to 1 step -1
+             string$(x) = mid$(fnamenobas$,x, 1)
+              string$=string$(x)
+           if string$ <> " " then string2$ = string$;string2$
+          string$=string2$
+   next x
+fnamenobas$ = string$
+ print "@ - [bas2exe] - calling fixtime, and fixdate"
 #lablog, "@ - [bas2exe] - calling fixtime, and fixdate"
 call fixtime
 call fixdate
@@ -1697,7 +1706,8 @@ open "BAS2EXE v1.8" for window_nf as #pick
  #pick.default, "!font Arial 12 bold"
  #pick.default, "!setfocus"
   print "window up and running "
- if tkn = 3 then
+  #lablog$, "If tkn = 3 then BAS<2>EXE or BAS<2>TKN Button was pressed. Creating Make New Project Window"
+   if tkn = 3 then
        #pick.temp, "!HIDE"
        #pick.exe "!HIDE"
        #pick.header "BAS < 2 > TKN"
