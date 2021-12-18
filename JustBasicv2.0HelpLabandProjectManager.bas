@@ -34,7 +34,7 @@
 'xxgeek code
 'declare variables
 'xxgeek code
- 'check Liberty Basic v4.5.1 Default Install Dir for existence
+ 'check Just basic v2.0 Default Install Dir for existence
 on error goto [errorReport]
 lablog$ = "lablog.log"
   open lablog$ for append as #lablog : lablogIsOpen = 1
@@ -50,7 +50,8 @@ lablog$ = "lablog.log"
  res=pathExists(JBpath$)
      if res then [start] else notice chr$(13)+" Just Basic v2.0 was not installed to the default install folder." +chr$(13)+"Hit [ok], then Select the Folder Just Basic v2.0 is Installed"
 
-'if folder path chosen by user for Liberty Basic install is wrong catch error later with check for lbrun2.exe
+'if folder path chosen by user for 
+ust Basic install is wrong catch error later with check for lbrun2.exe
 #lablog, " User Just Basic install path   >>>  not default >>>> opening FolderDialog........."
 caption$ = "Select your JustBasic v2.0 install Dir"
 a$ = FolderDialog$(caption$)
@@ -142,7 +143,7 @@ if right$(FolderDialog$,1) = "\" then FolderDialog$ = left$(FolderDialog$, len(F
 'jbsearch code by cundo
 #lablog, "finishing help lab window......."
 'top menu
-    menu #main, "File" , "Open a File in Liberty Basic v4.5.1", [openFile], "Exit", [quit.main]
+    menu #main, "File" , "Open a File in Just Basic v2.0", [openFile], "Exit", [quit.main]
     menu #main, "Edit"
     menu #main, "View", "LabLog (Progress Log)", [labLog], "Just Basic Error Log", [jberrorLog], "Runtime Error Log", [runtimeLog], "Help Lab Error Log", [helplaberrorLog], "System Information", [sysinfo]
     menu #main, "Tools" , "BAS <2> EXE", [makeEXE], "BAS <2> TKN",  [bas2tkn], ".BAS Line Count", [numofLines], "Task Manager", [taskman], "Resource Monitor", [resmon], "MSPaint", [pictures], "Voice Recorder", [record], "Notepad", [openNotePad], "Character Map", [charmap]
